@@ -103,4 +103,4 @@ make uninstall
 
 - **Author**: Steve Shi / 轩楝 (`zh-Hans`)
 - **Bundle ID**: `com.steveshi.pstee-metal`
-- **License**: MIT License
+- **License**: Mozilla Public License 2.0 (MPL-2.0)

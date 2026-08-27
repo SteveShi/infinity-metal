@@ -103,4 +103,4 @@ make uninstall
 
 - **作者**：Steve Shi / 轩楝 (`zh-Hans`)
 - **Bundle ID**：`com.steveshi.pstee-metal`
-- **开源协议**：MIT License
+- **开源协议**：Mozilla Public License 2.0 (MPL-2.0)
