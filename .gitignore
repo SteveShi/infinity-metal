@@ -1,0 +1,12 @@
+# Build artifacts
+build/
+*.o
+*.air
+*.metallib
+*.dylib
+*.bak
+
+# Temporary files
+*.log
+*.txt
+.DS_Store
