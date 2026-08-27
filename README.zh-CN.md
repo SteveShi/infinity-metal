@@ -24,12 +24,19 @@
 
 ---
 
-## 运行环境与依赖
+## 运行环境与版本兼容性
 
 - **操作系统**：macOS 11.0 (Big Sur) 及以上（MetalFX 空间超分辨率特性需 macOS 13.0+）。
 - **架构支持**：Universal Binary 通用二进制（原生支持 Apple Silicon M1/M2/M3/M4 系列及 Intel x86_64 芯片）。
 - **游戏版本**：Planescape Torment: Enhanced Edition（GOG / Steam macOS 版本）。
+  - **测试验证版本**：`v3.2.0.1` / `v3.1.3.0`（目前官方最新发布版本）。
+  - **兼容性范围**：覆盖 PST:EE 3.x 全系列版本。
 - **编译工具**：Xcode Command Line Tools（包含 `clang`、`metal`、`metallib`）。
+
+> [!TIP]
+> **官方游戏更新后的处理说明**：
+> 若通过 GOG Galaxy 或 Steam 客户端更新了游戏，官方更新会重置 App 代码签名并清除非官方文件。
+> 此时只需在本项目目录下重新执行一次 `make install` 即可一键恢复 Metal 渲染后端。
 
 ---
 

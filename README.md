@@ -24,12 +24,19 @@ This mod completely replaces the legacy and deprecated macOS OpenGL 2.1 fixed/pr
 
 ---
 
-## Requirements
+## Requirements & Compatibility
 
 - **macOS**: 11.0 (Big Sur) or higher (macOS 13.0+ required for MetalFX Spatial Upscaler).
 - **Architecture**: Universal Binary (`arm64` Apple Silicon + `x86_64` Intel).
-- **Game Version**: Planescape Torment: Enhanced Edition (GOG / Steam macOS version).
+- **Game Version**: Planescape Torment: Enhanced Edition (GOG / Steam macOS release).
+  - **Tested & Verified Version**: `v3.2.0.1` / `v3.1.3.0` (Latest release).
+  - **Compatibility**: All PST:EE v3.x series.
 - **Build Tools**: Xcode Command Line Tools (`clang`, `metal`, `metallib`).
+
+> [!TIP]
+> **After Official Game Updates**:
+> If Steam or GOG Galaxy updates the game, the official update will overwrite the game bundle signature and remove custom dylibs.
+> Simply re-run `make install` from this repository to re-apply the Metal backend.
 
 ---
 
