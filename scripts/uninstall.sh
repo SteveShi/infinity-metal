@@ -6,17 +6,45 @@
 
 set -euo pipefail
 
-GAME_DIR="/Applications/Planescape Torment - Enhanced Edition"
-GAME_APP="$GAME_DIR/Planescape Torment - Enhanced Edition.app"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+BACKUP_SIG="$PROJECT_DIR/build/_CodeSignature_orig.bak"
+
+# Auto-detect game application path
+CANDIDATE_PATHS=(
+    "${GAME_APP:-}"
+    "/Applications/Planescape Torment - Enhanced Edition/Planescape Torment - Enhanced Edition.app"
+    "/Applications/Planescape Torment - Enhanced Edition.app"
+    "$HOME/Applications/Planescape Torment - Enhanced Edition/Planescape Torment - Enhanced Edition.app"
+    "$HOME/Applications/Planescape Torment - Enhanced Edition.app"
+    "$HOME/Library/Application Support/Steam/steamapps/common/Planescape Torment Enhanced Edition/Planescape Torment - Enhanced Edition.app"
+)
+
+FOUND_APP=""
+for p in "${CANDIDATE_PATHS[@]}"; do
+    if [ -n "$p" ] && [ -d "$p" ]; then
+        FOUND_APP="$p"
+        break
+    fi
+done
+
+if [ -z "$FOUND_APP" ]; then
+    echo "❌ Error: Planescape Torment: Enhanced Edition not found in standard macOS locations."
+    echo "Please specify your game location via:"
+    echo '  GAME_APP="/path/to/Planescape Torment - Enhanced Edition.app" make uninstall'
+    exit 1
+fi
+
+GAME_APP="$FOUND_APP"
+GAME_DIR="$(dirname "$GAME_APP")"
 GAME_BIN_DIR="$GAME_APP/Contents/MacOS"
 LAUNCHER_CMD="$GAME_DIR/Planescape Torment (Metal).command"
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-BACKUP_SIG="$(dirname "$SCRIPT_DIR")/build/_CodeSignature_orig.bak"
 
 echo "=================================================="
 echo " Planescape Torment: Enhanced Edition Metal Mod"
 echo " Uninstallation & Restore Script"
 echo "=================================================="
+echo "📍 Target Game App: $GAME_APP"
 
 # 1. Remove deployed dylib
 if [ -f "$GAME_BIN_DIR/libPSTMetal.dylib" ]; then

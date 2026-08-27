@@ -37,25 +37,33 @@ This mod completely replaces the legacy and deprecated macOS OpenGL 2.1 fixed/pr
 
 ### 1. One-Click Install & Patch
 
-Clone and build the project, then run the installer:
+Clone the repository and run the installer:
 
 ```bash
-cd /Users/steve/Documents/GitHub/pstee-metal
+git clone https://github.com/SteveShi/pstee-metal.git
+cd pstee-metal
 make install
 ```
 
+> [!NOTE]
+> The installer automatically discovers your game app across standard GOG and Steam macOS locations.
+> If your game is located in a custom directory, specify `GAME_APP` explicitly:
+> ```bash
+> GAME_APP="/path/to/Planescape Torment - Enhanced Edition.app" make install
+> ```
+
 The installation script will:
-1. Build `libPSTMetal.dylib` (Universal Binary `arm64` + `x86_64`).
-2. Deploy `libPSTMetal.dylib` to `/Applications/Planescape Torment - Enhanced Edition/Planescape Torment - Enhanced Edition.app/Contents/MacOS/`.
-3. Ad-hoc re-sign the game bundle with entitlements allowing local dylib injection.
-4. Generate a one-click launcher: `/Applications/Planescape Torment - Enhanced Edition/Planescape Torment (Metal).command`.
+1. Build `libPSTMetal.dylib` as a Universal Binary (`arm64` + `x86_64`).
+2. Deploy `libPSTMetal.dylib` into the game app bundle.
+3. Ad-hoc re-sign the game binary with entitlements allowing local dynamic library injection.
+4. Generate a one-click launcher `Planescape Torment (Metal).command` in your game directory.
 
 ### 2. Launching the Game
 
 You can run the game with Metal acceleration via:
-- **Finder**: Double-click `/Applications/Planescape Torment - Enhanced Edition/Planescape Torment (Metal).command`
-- **Terminal**: Run `make test` from this repository
-- **GOG Galaxy**: In game settings, configure custom executable to launch `Planescape Torment (Metal).command`
+- **Finder**: Double-click `Planescape Torment (Metal).command` in the game directory.
+- **Terminal**: Run `make test` from this repository.
+- **GOG Galaxy / Steam**: In game settings, configure custom executable to launch `Planescape Torment (Metal).command`.
 
 ### 3. Uninstallation
 

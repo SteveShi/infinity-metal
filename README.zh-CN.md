@@ -37,25 +37,33 @@
 
 ### 1. 一键编译与安装
 
-进入工程根目录，执行安装命令：
+克隆本仓库并执行安装：
 
 ```bash
-cd /Users/steve/Documents/GitHub/pstee-metal
+git clone https://github.com/SteveShi/pstee-metal.git
+cd pstee-metal
 make install
 ```
 
+> [!NOTE]
+> 安装脚本会自动检索 macOS 默认的 GOG 与 Steam 游戏安装路径。
+> 如果您的游戏存放在自定义目录，可显式指定 `GAME_APP` 参数：
+> ```bash
+> GAME_APP="/path/to/Planescape Torment - Enhanced Edition.app" make install
+> ```
+
 安装脚本将自动执行以下操作：
 1. 编译生成双架构通用二进制动态库 `libPSTMetal.dylib`。
-2. 将动态库拷贝部署至 `/Applications/Planescape Torment - Enhanced Edition/Planescape Torment - Enhanced Edition.app/Contents/MacOS/`。
+2. 将动态库拷贝部署至游戏 App 的 `Contents/MacOS/` 目录下。
 3. 对游戏 App 进行 Ad-hoc 签名授权，开启本地动态库加载权限。
-4. 在游戏根目录下创建双击即玩启动脚本：`/Applications/Planescape Torment - Enhanced Edition/Planescape Torment (Metal).command`。
+4. 在游戏根目录下创建双击即玩启动脚本：`Planescape Torment (Metal).command`。
 
 ### 2. 启动游戏
 
 可通过以下任意一种方式以 Metal 渲染后端启动游戏：
 - **访达双击**：双击游戏根目录下的 `Planescape Torment (Metal).command` 启动器。
 - **终端启动**：在本项目根目录下运行 `make test`。
-- **GOG Galaxy 客户端**：在游戏设置中将自定义可执行文件路径设置为 `Planescape Torment (Metal).command`。
+- **GOG Galaxy / Steam 客户端**：在游戏设置中将自定义可执行文件路径设置为 `Planescape Torment (Metal).command`。
 
 ### 3. 一键卸载与还原
 
