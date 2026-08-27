@@ -119,3 +119,11 @@ make uninstall
 - **作者**：Steve Shi / 轩楝 (`zh-Hans`)
 - **Bundle ID**：`com.steveshi.pstee-metal`
 - **开源协议**：Mozilla Public License 2.0 (MPL-2.0)
+
+---
+
+## 法律与免责声明
+
+- *《异域镇魂曲》（Planescape: Torment）* 及 *《异域镇魂曲：增强版》（Planescape: Torment: Enhanced Edition）* 为 Beamdog、Wizards of the Coast LLC、Hasbro Inc. 或其相应权利人的注册商标。
+- 本项目为独立的非商业性第三方开源图形兼容层与技术研究成果，与 Beamdog、Wizards of the Coast、Hasbro、GOG 或 Valve Corporation 没有任何官方关联、赞助或背书关系。
+- 本仓库不包含任何游戏原始受版权保护的美术、音频、剧本、专有资源或游戏本体二进制文件。用户须自行持有合法购买的正版游戏本体方可配合使用本 Mod。

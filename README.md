@@ -119,3 +119,11 @@ make uninstall
 - **Author**: Steve Shi / 轩楝 (`zh-Hans`)
 - **Bundle ID**: `com.steveshi.pstee-metal`
 - **License**: Mozilla Public License 2.0 (MPL-2.0)
+
+---
+
+## Legal & Disclaimer
+
+- *Planescape: Torment* and *Planescape: Torment: Enhanced Edition* are registered trademarks of Beamdog, Wizards of the Coast LLC, Hasbro Inc., and/or their respective owners.
+- This project is an independent, non-commercial, third-party open-source compatibility and graphics translation layer. It is not affiliated with, endorsed by, or sponsored by Beamdog, Wizards of the Coast, Hasbro, GOG, or Valve Corporation.
+- This repository contains no game assets, copyrighted art, audio, or proprietary binaries. A legally purchased copy of the original game is required to use this software.
