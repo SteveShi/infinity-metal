@@ -12,9 +12,10 @@ bool metalfx_upscaler_init(id<MTLDevice> device, NSUInteger inputWidth, NSUInteg
     s_device = device;
     
     // Check environment flag (default enabled on Apple Silicon)
-    const char *envDisable = getenv("PST_METALFX_DISABLE");
+    const char *envDisable = getenv("INFINITY_METALFX_DISABLE");
+    if (!envDisable) envDisable = getenv("PST_METALFX_DISABLE");
     if (envDisable && strcmp(envDisable, "1") == 0) {
-        NSLog(@"[PSTMetal] MetalFX explicitly disabled via PST_METALFX_DISABLE.");
+        NSLog(@"[InfinityMetal] MetalFX explicitly disabled via INFINITY_METALFX_DISABLE.");
         s_isActive = NO;
         return false;
     }
@@ -31,7 +32,7 @@ bool metalfx_upscaler_init(id<MTLDevice> device, NSUInteger inputWidth, NSUInteg
         }
 
         if (![MTLFXSpatialScalerDescriptor supportsDevice:device]) {
-            NSLog(@"[PSTMetal] Device %@ does not support MTLFXSpatialScaler.", device.name);
+            NSLog(@"[InfinityMetal] Device %@ does not support MTLFXSpatialScaler.", device.name);
             s_isActive = NO;
             return false;
         }
@@ -59,13 +60,13 @@ bool metalfx_upscaler_init(id<MTLDevice> device, NSUInteger inputWidth, NSUInteg
         s_spatialScaler = [desc newSpatialScalerWithDevice:device];
         if (s_spatialScaler) {
             s_isActive = YES;
-            NSLog(@"[PSTMetal] 🚀 MetalFX Spatial Upscaler initialized: %lux%lu -> %lux%lu (%.1fx scale)",
+            NSLog(@"[InfinityMetal] 🚀 MetalFX Spatial Upscaler initialized: %lux%lu -> %lux%lu (%.1fx scale)",
                   (unsigned long)inputWidth, (unsigned long)inputHeight,
                   (unsigned long)outputWidth, (unsigned long)outputHeight,
                   (double)outputWidth / inputWidth);
             return true;
         } else {
-            NSLog(@"[PSTMetal] Failed to create MTLFXSpatialScaler.");
+            NSLog(@"[InfinityMetal] Failed to create MTLFXSpatialScaler.");
             s_isActive = NO;
             return false;
         }

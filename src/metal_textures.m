@@ -74,7 +74,7 @@ void metal_textures_init(id<MTLDevice> device) {
                              bytesPerRow:4];
 
     s_defaultSampler = get_or_create_sampler(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-    NSLog(@"[PSTMetal] Texture subsystem initialized with default fallback texture.");
+    NSLog(@"[InfinityMetal] Texture subsystem initialized with default fallback texture.");
 }
 
 void metal_tex_gen_textures(GLsizei n, GLuint *textures) {

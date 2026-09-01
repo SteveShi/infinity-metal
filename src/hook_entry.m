@@ -14,7 +14,7 @@
 #define DEBUG_LOG_GL 0
 
 #if DEBUG_LOG_GL
-#define LOG_GL(...) NSLog(@"[PSTMetal] " __VA_ARGS__)
+#define LOG_GL(...) NSLog(@"[InfinityMetal] " __VA_ARGS__)
 #else
 #define LOG_GL(...)
 #endif
@@ -491,8 +491,8 @@ static void my_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLe
 // Query
 static const GLubyte * my_glGetString(GLenum name) {
     if (name == 0x1F00 /* GL_VENDOR */) return (const GLubyte *)"Apple";
-    if (name == 0x1F01 /* GL_RENDERER */) return (const GLubyte *)"Apple Metal Renderer (PSTMetal)";
-    if (name == 0x1F02 /* GL_VERSION */) return (const GLubyte *)"2.1 Metal - PST:EE Enhanced";
+    if (name == 0x1F01 /* GL_RENDERER */) return (const GLubyte *)"Apple Metal Renderer (InfinityMetal)";
+    if (name == 0x1F02 /* GL_VERSION */) return (const GLubyte *)"2.1 Metal - Infinity Engine EE Enhanced";
     if (name == 0x8B8C /* GL_SHADING_LANGUAGE_VERSION */) return (const GLubyte *)"1.20 Metal";
     return orig_glGetString ? orig_glGetString(name) : (const GLubyte *)"";
 }
@@ -539,7 +539,7 @@ static void swizzled_flushBuffer(id self, SEL _cmd) {
         uint64_t texs = atomic_exchange_explicit(&stat_glTexImage2D, 0, memory_order_relaxed);
         uint64_t clears = atomic_exchange_explicit(&stat_glClear, 0, memory_order_relaxed);
 
-        NSLog(@"[PSTMetal] Frame %llu (Metal Native) | 60f draws: %llu, tex: %llu, clear: %llu",
+        NSLog(@"[InfinityMetal] Frame %llu (Metal Native) | 60f draws: %llu, tex: %llu, clear: %llu",
               frame, draws, texs, clears);
     }
 
@@ -555,13 +555,13 @@ static void swizzle_nsopengl_context(void) {
     Method setViewMethod = class_getInstanceMethod(cls, @selector(setView:));
     if (setViewMethod) {
         orig_setView_imp = method_setImplementation(setViewMethod, (IMP)swizzled_setView);
-        NSLog(@"[PSTMetal] Swizzled -[NSOpenGLContext setView:] for CAMetalLayer attachment.");
+        NSLog(@"[InfinityMetal] Swizzled -[NSOpenGLContext setView:] for CAMetalLayer attachment.");
     }
 
     Method flushMethod = class_getInstanceMethod(cls, @selector(flushBuffer));
     if (flushMethod) {
         orig_flushBuffer_imp = method_setImplementation(flushMethod, (IMP)swizzled_flushBuffer);
-        NSLog(@"[PSTMetal] Swizzled -[NSOpenGLContext flushBuffer] for Metal frame presentation.");
+        NSLog(@"[InfinityMetal] Swizzled -[NSOpenGLContext flushBuffer] for Metal frame presentation.");
     }
 }
 
@@ -667,11 +667,11 @@ static void* my_dlsym(void *handle, const char *symbol) {
 // ============================================================================
 
 __attribute__((constructor))
-static void pstmetal_init(void) {
-    NSLog(@"[PSTMetal] ========================================");
-    NSLog(@"[PSTMetal] Metal Rendering Backend v0.2.0 (Native Metal)");
-    NSLog(@"[PSTMetal] Planescape Torment: Enhanced Edition");
-    NSLog(@"[PSTMetal] ========================================");
+static void infinitymetal_init(void) {
+    NSLog(@"[InfinityMetal] ========================================");
+    NSLog(@"[InfinityMetal] Metal Rendering Backend v1.1.0 (Native Metal)");
+    NSLog(@"[InfinityMetal] Infinity Engine: Enhanced Edition");
+    NSLog(@"[InfinityMetal] ========================================");
 
     glstate_init();
     metal_renderer_init();
@@ -761,12 +761,12 @@ static void pstmetal_init(void) {
     };
 
     int num_hooks = sizeof(rebinds) / sizeof(struct rebinding);
-    NSLog(@"[PSTMetal] Hooking %d GL symbols via fishhook + 2 ObjC swizzles...", num_hooks);
+    NSLog(@"[InfinityMetal] Hooking %d GL symbols via fishhook + 2 ObjC swizzles...", num_hooks);
 
     int result = rebind_symbols(rebinds, num_hooks);
     if (result == 0) {
-        NSLog(@"[PSTMetal] All symbols hooked successfully. Native Metal pipeline ready.");
+        NSLog(@"[InfinityMetal] All symbols hooked successfully. Native Metal pipeline ready.");
     } else {
-        NSLog(@"[PSTMetal] Symbol hooking failed with code %d", result);
+        NSLog(@"[InfinityMetal] Symbol hooking failed with code %d", result);
     }
 }

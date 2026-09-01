@@ -1,17 +1,15 @@
-# Makefile for pstee-metal — OpenGL-to-Metal translation layer for PST:EE
+# Makefile for infinity-metal — Apple Metal rendering backend for Infinity Engine EE games
+# Supports: Baldur's Gate: Enhanced Edition, Baldur's Gate II: Enhanced Edition,
+#           Icewind Dale: Enhanced Edition, Planescape Torment: Enhanced Edition
 
 PROJECT_DIR := $(CURDIR)
 SRC_DIR     := $(PROJECT_DIR)/src
 BUILD_DIR   := $(PROJECT_DIR)/build
 SCRIPTS_DIR := $(PROJECT_DIR)/scripts
 
-TARGET        := $(BUILD_DIR)/libPSTMetal.dylib
-TARGET_X86_64 := $(BUILD_DIR)/libPSTMetal_x86_64.dylib
-TARGET_ARM64  := $(BUILD_DIR)/libPSTMetal_arm64.dylib
-
-# Paths with spaces must be quoted at point of use
-GAME_APP     = /Applications/Planescape Torment - Enhanced Edition/Planescape Torment - Enhanced Edition.app
-GAME_BIN_DIR = $(GAME_APP)/Contents/MacOS
+TARGET        := $(BUILD_DIR)/libInfinityMetal.dylib
+TARGET_X86_64 := $(BUILD_DIR)/libInfinityMetal_x86_64.dylib
+TARGET_ARM64  := $(BUILD_DIR)/libInfinityMetal_arm64.dylib
 
 CC     := clang
 CFLAGS := -Wall -Wextra -O2 -fPIC -fvisibility=hidden -Wno-deprecated-declarations
@@ -31,14 +29,14 @@ OBJS_X86_64 := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/x86_64/%.o, $(SRCS_C)) \
 OBJS_ARM64  := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/arm64/%.o, $(SRCS_C)) \
                $(patsubst $(SRC_DIR)/%.m, $(BUILD_DIR)/arm64/%.o, $(SRCS_M))
 
-# Metal shader compilation (optional, only when .metal files exist)
+# Metal shader compilation
 METALLIB  := $(BUILD_DIR)/shaders.metallib
 METAL_HDR := $(BUILD_DIR)/shaders_metal.h
 
 .PHONY: all clean install uninstall resign test
 
 all: $(TARGET)
-	@echo "[PSTMetal] Build complete: $(TARGET)"
+	@echo "[InfinityMetal] Build complete: $(TARGET)"
 	@file "$(TARGET)"
 
 # Directory creation
@@ -46,7 +44,6 @@ $(BUILD_DIR) $(BUILD_DIR)/x86_64 $(BUILD_DIR)/arm64:
 	@mkdir -p $@
 
 # Metal shader compilation — generates embeddable header
-# If no .metal files exist, create an empty placeholder header
 $(METAL_HDR): $(SRCS_METAL) | $(BUILD_DIR)
 ifneq ($(SRCS_METAL),)
 	xcrun -sdk macosx metal -c $(SRCS_METAL) -o "$(BUILD_DIR)/shaders.air"
@@ -88,18 +85,18 @@ $(TARGET): $(TARGET_X86_64) $(TARGET_ARM64)
 clean:
 	rm -rf "$(BUILD_DIR)"
 
-# Install: deploy dylib and launcher to game directory
+# Install: deploy dylib and launchers to all detected EE games
 install: $(TARGET)
 	@"$(SCRIPTS_DIR)/install.sh"
 
-# Uninstall: remove patch from game directory
+# Uninstall: remove patch from all EE games
 uninstall:
 	@"$(SCRIPTS_DIR)/uninstall.sh"
 
 # Re-sign game with entitlements for DYLD injection
 resign:
-	"$(SCRIPTS_DIR)/resign.sh"
+	@"$(SCRIPTS_DIR)/resign.sh"
 
-# Quick test: build, resign, and launch
+# Quick test: build and launch game selector
 test: $(TARGET)
-	"$(SCRIPTS_DIR)/launch_metal.sh"
+	@"$(SCRIPTS_DIR)/launch_metal.sh"

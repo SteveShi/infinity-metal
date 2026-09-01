@@ -109,13 +109,13 @@ static void build_pipeline_states(void) {
     for (int s = 0; s < PST_SHADER_COUNT; s++) {
         id<MTLFunction> fragFunc = [s_library newFunctionWithName:fragmentFuncNames[s]];
         if (!fragFunc) {
-            NSLog(@"[PSTMetal] WARNING: Missing MSL fragment function: %@", fragmentFuncNames[s]);
+            NSLog(@"[InfinityMetal] WARNING: Missing MSL fragment function: %@", fragmentFuncNames[s]);
             continue;
         }
 
         for (int b = 0; b < BLEND_MODE_COUNT; b++) {
             MTLRenderPipelineDescriptor *pDesc = [[MTLRenderPipelineDescriptor alloc] init];
-            pDesc.vertexFunction = (s == PST_SHADER_YUV || s == PST_SHADER_YUV_GRAY) ? vertYuvFunc : vertFunc;
+            pDesc.vertexFunction = (s == IE_SHADER_YUV || s == IE_SHADER_YUV_GRAY) ? vertYuvFunc : vertFunc;
             pDesc.fragmentFunction = fragFunc;
             pDesc.vertexDescriptor = vDesc;
             pDesc.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -150,11 +150,11 @@ static void build_pipeline_states(void) {
             NSError *err = nil;
             s_pipelineCache[s][b] = [s_device newRenderPipelineStateWithDescriptor:pDesc error:&err];
             if (err) {
-                NSLog(@"[PSTMetal] Error creating pipeline state (%d, %d): %@", s, b, err);
+                NSLog(@"[InfinityMetal] Error creating pipeline state (%d, %d): %@", s, b, err);
             }
         }
     }
-    NSLog(@"[PSTMetal] Precompiled %d Metal render pipeline states.", PST_SHADER_COUNT * BLEND_MODE_COUNT);
+    NSLog(@"[InfinityMetal] Precompiled %d Metal render pipeline states.", IE_SHADER_COUNT * BLEND_MODE_COUNT);
 }
 
 void shader_map_init(id<MTLDevice> device, id<MTLLibrary> library) {
@@ -326,14 +326,14 @@ PSTShaderType shader_map_get_active_shader(void) {
     return info ? info.shaderType : PST_SHADER_DRAW;
 }
 
-id<MTLRenderPipelineState> shader_map_get_pipeline(PSTShaderType shaderType, uint32_t blendMode) {
-    if (shaderType >= PST_SHADER_COUNT) shaderType = PST_SHADER_DRAW;
+id<MTLRenderPipelineState> shader_map_get_pipeline(IEShaderType shaderType, uint32_t blendMode) {
+    if (shaderType >= IE_SHADER_COUNT) shaderType = IE_SHADER_DRAW;
     if (blendMode >= BLEND_MODE_COUNT) blendMode = BLEND_ALPHA;
     return s_pipelineCache[shaderType][blendMode];
 }
 
-PSTMetalUniforms shader_map_get_current_uniforms(void) {
-    PSTMetalUniforms u;
+IEMetalUniforms shader_map_get_current_uniforms(void) {
+    IEMetalUniforms u;
     PSTProgramInfo *info = s_programMap[@(s_activeProgramId)];
     if (info) {
         u.uST = info.uST;

@@ -33,7 +33,7 @@ static BOOL s_hasClearedThisFrame = NO;
 bool metal_renderer_init(void) {
     s_device = MTLCreateSystemDefaultDevice();
     if (!s_device) {
-        NSLog(@"[PSTMetal] ERROR: Metal is not supported on this device.");
+        NSLog(@"[InfinityMetal] ERROR: Metal is not supported on this device.");
         return false;
     }
 
@@ -48,17 +48,7 @@ bool metal_renderer_init(void) {
     }
 
     if (!s_library) {
-        // Fallback: compile MSL source at runtime if available
-        NSString *shaderSourcePath = @"/Users/steve/Documents/GitHub/pstee-metal/src/metal_shaders.metal";
-        NSString *shaderSource = [NSString stringWithContentsOfFile:shaderSourcePath encoding:NSUTF8StringEncoding error:nil];
-        if (shaderSource) {
-            MTLCompileOptions *options = [[MTLCompileOptions alloc] init];
-            s_library = [s_device newLibraryWithSource:shaderSource options:options error:&error];
-        }
-    }
-
-    if (!s_library) {
-        NSLog(@"[PSTMetal] ERROR: Failed to load Metal shaders: %@", error);
+        NSLog(@"[InfinityMetal] ERROR: Failed to load Metal shaders: %@", error);
         return false;
     }
 
@@ -68,7 +58,7 @@ bool metal_renderer_init(void) {
 
     // 3. Create triple buffers for dynamic geometry and uniforms
     NSUInteger vertexBufferSize = MAX_VERTICES_PER_FRAME * sizeof(PSTVertex2D);
-    NSUInteger uniformBufferSize = sizeof(PSTMetalUniforms) * 256;
+    NSUInteger uniformBufferSize = sizeof(IEMetalUniforms) * 256;
 
     for (int i = 0; i < IN_FLIGHT_FRAMES; i++) {
         s_vertexBuffers[i] = [s_device newBufferWithLength:vertexBufferSize options:MTLResourceStorageModeShared];
@@ -80,7 +70,7 @@ bool metal_renderer_init(void) {
     s_renderPassDesc.colorAttachments[0].storeAction = MTLStoreActionStore;
     s_renderPassDesc.colorAttachments[0].clearColor = s_clearColor;
 
-    NSLog(@"[PSTMetal] Core Metal renderer initialized successfully on %@", s_device.name);
+    NSLog(@"[InfinityMetal] Core Metal renderer initialized successfully on %@", s_device.name);
     return true;
 }
 
@@ -118,7 +108,7 @@ void metal_renderer_attach_to_view(NSView *view) {
             [view.layer addSublayer:s_metalLayer];
         }
 
-        NSLog(@"[PSTMetal] CAMetalLayer attached to view (bounds: %.0fx%.0f, drawableSize: %.0fx%.0f, scale: %.1f)",
+        NSLog(@"[InfinityMetal] CAMetalLayer attached to view (bounds: %.0fx%.0f, drawableSize: %.0fx%.0f, scale: %.1f)",
               boundsSize.width, boundsSize.height,
               s_metalLayer.drawableSize.width, s_metalLayer.drawableSize.height, scale);
     };
@@ -312,7 +302,7 @@ void metal_renderer_draw_arrays(GLenum mode, GLint first, GLsizei count) {
     [s_currentEncoder setVertexBuffer:s_vertexBuffers[s_frameIndex] offset:vertexByteOffset atIndex:0];
 
     // 4. Set uniforms
-    PSTMetalUniforms uniforms = shader_map_get_current_uniforms();
+    IEMetalUniforms uniforms = shader_map_get_current_uniforms();
     [s_currentEncoder setVertexBytes:&uniforms length:sizeof(uniforms) atIndex:1];
     [s_currentEncoder setFragmentBytes:&uniforms length:sizeof(uniforms) atIndex:1];
 
@@ -322,7 +312,7 @@ void metal_renderer_draw_arrays(GLenum mode, GLint first, GLsizei count) {
     [s_currentEncoder setFragmentTexture:mainTex atIndex:0];
     [s_currentEncoder setFragmentSamplerState:sampler atIndex:0];
 
-    if (shaderType == PST_SHADER_YUV) {
+    if (shaderType == IE_SHADER_YUV) {
         id<MTLTexture> texU = metal_tex_get_current(1);
         id<MTLTexture> texV = metal_tex_get_current(2);
         [s_currentEncoder setFragmentTexture:texU atIndex:1];
@@ -341,7 +331,7 @@ void metal_renderer_draw_arrays(GLenum mode, GLint first, GLsizei count) {
     uint64_t currFrame = atomic_load_explicit(&g_frameCount, memory_order_relaxed);
     if (currFrame == 150) {
         GLuint boundTex = g_glState.textureUnits[0].boundTexture2D;
-        NSLog(@"[PSTMetal-F150] Draw #%lu: count=%d, mode=0x%x, shader=%d, tex=%u (%lux%lu), blend=%d(0x%x,0x%x), uST=(%.5f,%.5f,%.2f,%.2f), v0=(%.1f,%.1f), tc0=(%.3f,%.3f), col=(%.2f,%.2f,%.2f,%.2f), tone=(%.2f,%.2f,%.2f,%.2f)",
+        NSLog(@"[InfinityMetal-F150] Draw #%lu: count=%d, mode=0x%x, shader=%d, tex=%u (%lux%lu), blend=%d(0x%x,0x%x), uST=(%.5f,%.5f,%.2f,%.2f), v0=(%.1f,%.1f), tc0=(%.3f,%.3f), col=(%.2f,%.2f,%.2f,%.2f), tone=(%.2f,%.2f,%.2f,%.2f)",
               (unsigned long)s_currentVertexOffset, count, mode, shaderType, boundTex,
               (unsigned long)mainTex.width, (unsigned long)mainTex.height,
               g_glState.blend.enabled, g_glState.blend.srcFactor, g_glState.blend.dstFactor,

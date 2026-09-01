@@ -1,5 +1,5 @@
-#ifndef PSTMETAL_SHADER_MAP_H
-#define PSTMETAL_SHADER_MAP_H
+#ifndef INFINITY_METAL_SHADER_MAP_H
+#define INFINITY_METAL_SHADER_MAP_H
 
 #import <Metal/Metal.h>
 #import <OpenGL/gl.h>
@@ -9,19 +9,32 @@
 extern "C" {
 #endif
 
-// PST:EE 9 Shader program types
+// Infinity Engine EE 9 Shader program types
 typedef enum {
-    PST_SHADER_DRAW = 0,    // fpDraw.glsl
-    PST_SHADER_TONE = 1,    // fpTone.glsl
-    PST_SHADER_CATROM = 2,  // fpCatRom.glsl
-    PST_SHADER_YUV = 3,     // fpYUV.glsl
-    PST_SHADER_YUV_GRAY = 4,// fpYUVGRY.glsl
-    PST_SHADER_SPRITE = 5,  // fpSprite.glsl
-    PST_SHADER_FONT = 6,    // fpFONT.glsl
-    PST_SHADER_SELECT = 7,  // fpSELECT.glsl
-    PST_SHADER_SEAM = 8,    // fpSEAM.glsl
-    PST_SHADER_COUNT = 9
-} PSTShaderType;
+    IE_SHADER_DRAW = 0,    // fpDraw.glsl
+    IE_SHADER_TONE = 1,    // fpTone.glsl
+    IE_SHADER_CATROM = 2,  // fpCatRom.glsl
+    IE_SHADER_YUV = 3,     // fpYUV.glsl
+    IE_SHADER_YUV_GRAY = 4,// fpYUVGRY.glsl
+    IE_SHADER_SPRITE = 5,  // fpSprite.glsl
+    IE_SHADER_FONT = 6,    // fpFONT.glsl
+    IE_SHADER_SELECT = 7,  // fpSELECT.glsl
+    IE_SHADER_SEAM = 8,    // fpSEAM.glsl
+    IE_SHADER_COUNT = 9
+} IEShaderType;
+
+// Backward-compat aliases
+#define PST_SHADER_DRAW IE_SHADER_DRAW
+#define PST_SHADER_TONE IE_SHADER_TONE
+#define PST_SHADER_CATROM IE_SHADER_CATROM
+#define PST_SHADER_YUV IE_SHADER_YUV
+#define PST_SHADER_YUV_GRAY IE_SHADER_YUV_GRAY
+#define PST_SHADER_SPRITE IE_SHADER_SPRITE
+#define PST_SHADER_FONT IE_SHADER_FONT
+#define PST_SHADER_SELECT IE_SHADER_SELECT
+#define PST_SHADER_SEAM IE_SHADER_SEAM
+#define PST_SHADER_COUNT IE_SHADER_COUNT
+typedef IEShaderType PSTShaderType;
 
 // Uniforms struct matching MSL layout
 typedef struct {
@@ -32,7 +45,9 @@ typedef struct {
     float       uZoomStrength;
     float       uBrightness;
     float       uGamma;
-} PSTMetalUniforms;
+} IEMetalUniforms;
+
+typedef IEMetalUniforms PSTMetalUniforms;
 
 void shader_map_init(id<MTLDevice> device, id<MTLLibrary> library);
 
@@ -56,12 +71,12 @@ void shader_map_uniform_2fv(GLint location, GLsizei count, const GLfloat *value)
 void shader_map_uniform_4fv(GLint location, GLsizei count, const GLfloat *value);
 
 // Query active shader & pipeline state
-PSTShaderType shader_map_get_active_shader(void);
-id<MTLRenderPipelineState> shader_map_get_pipeline(PSTShaderType shaderType, uint32_t blendMode);
-PSTMetalUniforms shader_map_get_current_uniforms(void);
+IEShaderType shader_map_get_active_shader(void);
+id<MTLRenderPipelineState> shader_map_get_pipeline(IEShaderType shaderType, uint32_t blendMode);
+IEMetalUniforms shader_map_get_current_uniforms(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // PSTMETAL_SHADER_MAP_H
+#endif // INFINITY_METAL_SHADER_MAP_H
