@@ -53,9 +53,11 @@ static void (*orig_glVertexPointer)(GLint size, GLenum type, GLsizei stride, con
 static void (*orig_glTexCoordPointer)(GLint size, GLenum type, GLsizei stride, const void *pointer);
 static void (*orig_glColorPointer)(GLint size, GLenum type, GLsizei stride, const void *pointer);
 static void (*orig_glEnableClientState)(GLenum array);
+static void (*orig_glDisableClientState)(GLenum array);
 static void (*orig_glClientActiveTexture)(GLenum texture);
 static void (*orig_glVertexAttribPointer)(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer);
 static void (*orig_glEnableVertexAttribArray)(GLuint index);
+static void (*orig_glDisableVertexAttribArray)(GLuint index);
 static void (*orig_glBindAttribLocation)(GLuint program, GLuint index, const GLchar *name);
 
 static void (*orig_glGenTextures)(GLsizei n, GLuint *textures);
@@ -216,8 +218,7 @@ static void my_glVertexPointer(GLint size, GLenum type, GLsizei stride, const vo
     g_glState.vertexType = type;
     g_glState.vertexStride = stride;
     g_glState.vertexPointer = pointer;
-    g_glState.vertexArrayEnabled = true;
-    NSLog(@"[PSTMetal-Ptr] glVertexPointer: size=%d, type=0x%x, stride=%d, ptr=%p", size, type, stride, pointer);
+    NSLog(@"[InfinityMetal-Ptr] glVertexPointer: size=%d, type=0x%x, stride=%d, ptr=%p", size, type, stride, pointer);
     if (orig_glVertexPointer) orig_glVertexPointer(size, type, stride, pointer);
 }
 
@@ -226,8 +227,7 @@ static void my_glTexCoordPointer(GLint size, GLenum type, GLsizei stride, const 
     g_glState.texCoordType = type;
     g_glState.texCoordStride = stride;
     g_glState.texCoordPointer = pointer;
-    g_glState.texCoordArrayEnabled = true;
-    NSLog(@"[PSTMetal-Ptr] glTexCoordPointer: size=%d, type=0x%x, stride=%d, ptr=%p", size, type, stride, pointer);
+    NSLog(@"[InfinityMetal-Ptr] glTexCoordPointer: size=%d, type=0x%x, stride=%d, ptr=%p", size, type, stride, pointer);
     if (orig_glTexCoordPointer) orig_glTexCoordPointer(size, type, stride, pointer);
 }
 
@@ -236,16 +236,24 @@ static void my_glColorPointer(GLint size, GLenum type, GLsizei stride, const voi
     g_glState.colorType = type;
     g_glState.colorStride = stride;
     g_glState.colorPointer = pointer;
-    g_glState.colorArrayEnabled = true;
-    NSLog(@"[PSTMetal-Ptr] glColorPointer: size=%d, type=0x%x, stride=%d, ptr=%p", size, type, stride, pointer);
+    NSLog(@"[InfinityMetal-Ptr] glColorPointer: size=%d, type=0x%x, stride=%d, ptr=%p", size, type, stride, pointer);
     if (orig_glColorPointer) orig_glColorPointer(size, type, stride, pointer);
 }
 
 static void my_glEnableClientState(GLenum array) {
+    NSLog(@"[InfinityMetal-ClientState] glEnableClientState: 0x%x", array);
     if (array == 0x8074 /* GL_VERTEX_ARRAY */) g_glState.vertexArrayEnabled = true;
     else if (array == 0x8078 /* GL_TEXTURE_COORD_ARRAY */) g_glState.texCoordArrayEnabled = true;
     else if (array == 0x8076 /* GL_COLOR_ARRAY */) g_glState.colorArrayEnabled = true;
     if (orig_glEnableClientState) orig_glEnableClientState(array);
+}
+
+static void my_glDisableClientState(GLenum array) {
+    NSLog(@"[InfinityMetal-ClientState] glDisableClientState: 0x%x", array);
+    if (array == 0x8074 /* GL_VERTEX_ARRAY */) g_glState.vertexArrayEnabled = false;
+    else if (array == 0x8078 /* GL_TEXTURE_COORD_ARRAY */) g_glState.texCoordArrayEnabled = false;
+    else if (array == 0x8076 /* GL_COLOR_ARRAY */) g_glState.colorArrayEnabled = false;
+    if (orig_glDisableClientState) orig_glDisableClientState(array);
 }
 
 static void my_glClientActiveTexture(GLenum texture) {
@@ -260,27 +268,33 @@ static void my_glVertexAttribPointer(GLuint index, GLint size, GLenum type, GLbo
         g_glState.vertexStride = stride;
         g_glState.vertexPointer = pointer;
         g_glState.vertexNormalized = normalized;
-        g_glState.vertexArrayEnabled = true;
     } else if (index == 1 || index == 8) {
         g_glState.texCoordSize = size;
         g_glState.texCoordType = type;
         g_glState.texCoordStride = stride;
         g_glState.texCoordPointer = pointer;
         g_glState.texCoordNormalized = normalized;
-        g_glState.texCoordArrayEnabled = true;
-    } else if (index == 2 || index == 3) {
+    } else if (index == 2) {
         g_glState.colorSize = size;
         g_glState.colorType = type;
         g_glState.colorStride = stride;
         g_glState.colorPointer = pointer;
-        g_glState.colorArrayEnabled = true;
     }
     if (orig_glVertexAttribPointer) orig_glVertexAttribPointer(index, size, type, normalized, stride, pointer);
 }
 
 static void my_glEnableVertexAttribArray(GLuint index) {
-    (void)index;
+    if (index == 0) g_glState.vertexArrayEnabled = true;
+    else if (index == 1 || index == 8) g_glState.texCoordArrayEnabled = true;
+    else if (index == 2) g_glState.colorArrayEnabled = true;
     if (orig_glEnableVertexAttribArray) orig_glEnableVertexAttribArray(index);
+}
+
+static void my_glDisableVertexAttribArray(GLuint index) {
+    if (index == 0) g_glState.vertexArrayEnabled = false;
+    else if (index == 1 || index == 8) g_glState.texCoordArrayEnabled = false;
+    else if (index == 2) g_glState.colorArrayEnabled = false;
+    if (orig_glDisableVertexAttribArray) orig_glDisableVertexAttribArray(index);
 }
 
 static void my_glBindAttribLocation(GLuint program, GLuint index, const GLchar *name) {
@@ -702,9 +716,11 @@ static void infinitymetal_init(void) {
         {"glTexCoordPointer", (void*)my_glTexCoordPointer, (void**)&orig_glTexCoordPointer},
         {"glColorPointer", (void*)my_glColorPointer, (void**)&orig_glColorPointer},
         {"glEnableClientState", (void*)my_glEnableClientState, (void**)&orig_glEnableClientState},
+        {"glDisableClientState", (void*)my_glDisableClientState, (void**)&orig_glDisableClientState},
         {"glClientActiveTexture", (void*)my_glClientActiveTexture, (void**)&orig_glClientActiveTexture},
         {"glVertexAttribPointer", (void*)my_glVertexAttribPointer, (void**)&orig_glVertexAttribPointer},
         {"glEnableVertexAttribArray", (void*)my_glEnableVertexAttribArray, (void**)&orig_glEnableVertexAttribArray},
+        {"glDisableVertexAttribArray", (void*)my_glDisableVertexAttribArray, (void**)&orig_glDisableVertexAttribArray},
         {"glBindAttribLocation", (void*)my_glBindAttribLocation, (void**)&orig_glBindAttribLocation},
 
         {"glGenTextures", (void*)my_glGenTextures, (void**)&orig_glGenTextures},

@@ -183,18 +183,6 @@ void metal_renderer_viewport(GLint x, GLint y, GLsizei width, GLsizei height) {
     g_glState.viewport.y = y;
     g_glState.viewport.width = width;
     g_glState.viewport.height = height;
-
-    if (s_metalLayer && width > 0 && height > 0) {
-        if (s_metalLayer.drawableSize.width != (CGFloat)width || s_metalLayer.drawableSize.height != (CGFloat)height) {
-            s_metalLayer.drawableSize = CGSizeMake(width, height);
-        }
-    }
-
-    if (s_currentEncoder && width > 0 && height > 0) {
-        CGFloat scale = s_metalLayer ? s_metalLayer.contentsScale : 1.0;
-        MTLViewport vp = { (double)x * scale, (double)y * scale, (double)width * scale, (double)height * scale, 0.0, 1.0 };
-        [s_currentEncoder setViewport:vp];
-    }
 }
 
 void metal_renderer_scissor(GLint x, GLint y, GLsizei width, GLsizei height) {
@@ -202,11 +190,6 @@ void metal_renderer_scissor(GLint x, GLint y, GLsizei width, GLsizei height) {
     g_glState.scissor.y = y;
     g_glState.scissor.width = width;
     g_glState.scissor.height = height;
-
-    if (s_currentEncoder && g_glState.scissor.enabled && width > 0 && height > 0) {
-        MTLScissorRect sc = { (NSUInteger)MAX(0, x), (NSUInteger)MAX(0, y), (NSUInteger)width, (NSUInteger)height };
-        [s_currentEncoder setScissorRect:sc];
-    }
 }
 
 void metal_renderer_draw_arrays(GLenum mode, GLint first, GLsizei count) {
@@ -231,7 +214,7 @@ void metal_renderer_draw_arrays(GLenum mode, GLint first, GLsizei count) {
     for (GLsizei i = 0; i < count; i++) {
         GLint idx = first + i;
         // Position
-        if (vPtr) {
+        if (vPtr && g_glState.vertexArrayEnabled) {
             if (g_glState.vertexType == 0x1402 /* GL_SHORT */) {
                 const int16_t *pos = (const int16_t *)(vPtr + idx * vStride);
                 dstVertices[i].position[0] = (float)pos[0];
@@ -247,7 +230,7 @@ void metal_renderer_draw_arrays(GLenum mode, GLint first, GLsizei count) {
         }
 
         // TexCoord
-        if (tPtr) {
+        if (tPtr && g_glState.texCoordArrayEnabled) {
             if (g_glState.texCoordType == 0x1402 /* GL_SHORT */) {
                 const int16_t *tc = (const int16_t *)(tPtr + idx * tStride);
                 dstVertices[i].texCoord[0] = g_glState.texCoordNormalized ? (tc[0] / 32767.0f) : (float)tc[0];
@@ -267,25 +250,29 @@ void metal_renderer_draw_arrays(GLenum mode, GLint first, GLsizei count) {
         }
 
         // Color
-        if (cPtr) {
+        if (cPtr && g_glState.colorArrayEnabled) {
             if (g_glState.colorType == 0x1401 /* GL_UNSIGNED_BYTE */) {
                 const uint8_t *c = (const uint8_t *)(cPtr + idx * cStride);
                 dstVertices[i].color[0] = c[0] / 255.0f;
                 dstVertices[i].color[1] = c[1] / 255.0f;
                 dstVertices[i].color[2] = c[2] / 255.0f;
-                dstVertices[i].color[3] = c[3] / 255.0f;
+                dstVertices[i].color[3] = (g_glState.colorSize == 4) ? (c[3] / 255.0f) : 1.0f;
             } else {
                 const float *c = (const float *)(cPtr + idx * cStride);
                 dstVertices[i].color[0] = c[0];
                 dstVertices[i].color[1] = c[1];
                 dstVertices[i].color[2] = c[2];
-                dstVertices[i].color[3] = c[3];
+                dstVertices[i].color[3] = (g_glState.colorSize == 4) ? c[3] : 1.0f;
             }
         } else {
-            dstVertices[i].color[0] = 1.0f;
-            dstVertices[i].color[1] = 1.0f;
-            dstVertices[i].color[2] = 1.0f;
-            dstVertices[i].color[3] = 1.0f;
+            float cr = g_glState.immediate.currentColor[0];
+            float cg = g_glState.immediate.currentColor[1];
+            float cb = g_glState.immediate.currentColor[2];
+            float ca = g_glState.immediate.currentColor[3];
+            dstVertices[i].color[0] = (cr > 0.0f || cg > 0.0f || cb > 0.0f) ? cr : 1.0f;
+            dstVertices[i].color[1] = (cr > 0.0f || cg > 0.0f || cb > 0.0f) ? cg : 1.0f;
+            dstVertices[i].color[2] = (cr > 0.0f || cg > 0.0f || cb > 0.0f) ? cb : 1.0f;
+            dstVertices[i].color[3] = (ca > 0.0f) ? ca : 1.0f;
         }
     }
 
@@ -319,27 +306,22 @@ void metal_renderer_draw_arrays(GLenum mode, GLint first, GLsizei count) {
         [s_currentEncoder setFragmentTexture:texV atIndex:2];
     }
 
-    // 6. Set viewport & scissor
-    if (g_glState.viewport.width > 0 && g_glState.viewport.height > 0) {
-        MTLViewport vp = { (double)g_glState.viewport.x, (double)g_glState.viewport.y,
-                           (double)g_glState.viewport.width, (double)g_glState.viewport.height, 0.0, 1.0 };
-        [s_currentEncoder setViewport:vp];
-    }
-
-    // Diagnostic logging on frame 150
-    extern _Atomic uint64_t g_frameCount;
-    uint64_t currFrame = atomic_load_explicit(&g_frameCount, memory_order_relaxed);
-    if (currFrame == 150) {
-        GLuint boundTex = g_glState.textureUnits[0].boundTexture2D;
-        NSLog(@"[InfinityMetal-F150] Draw #%lu: count=%d, mode=0x%x, shader=%d, tex=%u (%lux%lu), blend=%d(0x%x,0x%x), uST=(%.5f,%.5f,%.2f,%.2f), v0=(%.1f,%.1f), tc0=(%.3f,%.3f), col=(%.2f,%.2f,%.2f,%.2f), tone=(%.2f,%.2f,%.2f,%.2f)",
-              (unsigned long)s_currentVertexOffset, count, mode, shaderType, boundTex,
-              (unsigned long)mainTex.width, (unsigned long)mainTex.height,
-              g_glState.blend.enabled, g_glState.blend.srcFactor, g_glState.blend.dstFactor,
-              uniforms.uST.x, uniforms.uST.y, uniforms.uST.z, uniforms.uST.w,
-              dstVertices[0].position[0], dstVertices[0].position[1],
-              dstVertices[0].texCoord[0], dstVertices[0].texCoord[1],
-              dstVertices[0].color[0], dstVertices[0].color[1], dstVertices[0].color[2], dstVertices[0].color[3],
-              uniforms.uColorTone.x, uniforms.uColorTone.y, uniforms.uColorTone.z, uniforms.uColorTone.w);
+    // 6. Set scissor if enabled
+    if (s_currentDrawable) {
+        if (g_glState.scissor.enabled && g_glState.scissor.width > 0 && g_glState.scissor.height > 0) {
+            CGFloat scale = s_metalLayer ? s_metalLayer.contentsScale : 1.0;
+            NSUInteger scX = (NSUInteger)MAX(0.0, g_glState.scissor.x * scale);
+            NSUInteger scY = (NSUInteger)MAX(0.0, g_glState.scissor.y * scale);
+            NSUInteger scW = (NSUInteger)MIN((double)s_currentDrawable.texture.width - scX, g_glState.scissor.width * scale);
+            NSUInteger scH = (NSUInteger)MIN((double)s_currentDrawable.texture.height - scY, g_glState.scissor.height * scale);
+            if (scW > 0 && scH > 0) {
+                MTLScissorRect sc = { scX, scY, scW, scH };
+                [s_currentEncoder setScissorRect:sc];
+            }
+        } else {
+            MTLScissorRect sc = { 0, 0, s_currentDrawable.texture.width, s_currentDrawable.texture.height };
+            [s_currentEncoder setScissorRect:sc];
+        }
     }
 
     // 7. Primitive type & draw

@@ -188,25 +188,26 @@ void shader_map_shader_source(GLuint shader, GLsizei count, const GLchar *const*
     }
     info.source = fullSource;
 
-    if ([fullSource containsString:@"fpTone"] || [fullSource containsString:@"uColorTone.a"]) {
-        info.identifiedType = PST_SHADER_TONE;
-    } else if ([fullSource containsString:@"fpCatRom"]) {
-        info.identifiedType = PST_SHADER_CATROM;
-    } else if ([fullSource containsString:@"fpYUVGRY"]) {
-        info.identifiedType = PST_SHADER_YUV_GRAY;
-    } else if ([fullSource containsString:@"fpYUV"]) {
-        info.identifiedType = PST_SHADER_YUV;
-    } else if ([fullSource containsString:@"fpSprite"] || [fullSource containsString:@"uSpriteBlurAmount"]) {
-        info.identifiedType = PST_SHADER_SPRITE;
-    } else if ([fullSource containsString:@"fpFONT"]) {
-        info.identifiedType = PST_SHADER_FONT;
-    } else if ([fullSource containsString:@"fpSELECT"]) {
-        info.identifiedType = PST_SHADER_SELECT;
-    } else if ([fullSource containsString:@"fpSEAM"]) {
-        info.identifiedType = PST_SHADER_SEAM;
+    if ([fullSource containsString:@"fpCatRom.glsl"] || [fullSource containsString:@"fpCatRom"]) {
+        info.identifiedType = IE_SHADER_CATROM;
+    } else if ([fullSource containsString:@"fpYUVGRY.glsl"] || [fullSource containsString:@"fpYUVGRY"]) {
+        info.identifiedType = IE_SHADER_YUV_GRAY;
+    } else if ([fullSource containsString:@"fpYUV.glsl"] || [fullSource containsString:@"fpYUV"]) {
+        info.identifiedType = IE_SHADER_YUV;
+    } else if ([fullSource containsString:@"fpSprite.glsl"] || [fullSource containsString:@"uSpriteBlurAmount"]) {
+        info.identifiedType = IE_SHADER_SPRITE;
+    } else if ([fullSource containsString:@"fpFONT.glsl"] || [fullSource containsString:@"fpFONT"]) {
+        info.identifiedType = IE_SHADER_FONT;
+    } else if ([fullSource containsString:@"fpSELECT.glsl"] || [fullSource containsString:@"fpSELECT"]) {
+        info.identifiedType = IE_SHADER_SELECT;
+    } else if ([fullSource containsString:@"fpSEAM.glsl"] || [fullSource containsString:@"fpSEAM"]) {
+        info.identifiedType = IE_SHADER_SEAM;
+    } else if ([fullSource containsString:@"fpTone.glsl"]) {
+        info.identifiedType = IE_SHADER_TONE;
     } else {
-        info.identifiedType = PST_SHADER_DRAW;
+        info.identifiedType = IE_SHADER_DRAW;
     }
+    NSLog(@"[InfinityMetal-Shader] Shader %u: identified as %d", shader, info.identifiedType);
 }
 
 void shader_map_compile_shader(GLuint shader) {

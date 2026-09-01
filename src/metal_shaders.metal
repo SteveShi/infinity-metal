@@ -93,8 +93,11 @@ fragment float4 fragment_draw(VertexOut in [[stage_in]],
                               texture2d<float> tex [[texture(0)]],
                               sampler smp [[sampler(0)]],
                               constant Uniforms &u [[buffer(1)]]) {
-    float4 texColor = tex.sample(smp, in.texCoord);
-    return SolveBrightnessContrast(texColor * in.color, u);
+    float4 texColor = tex.sample(smp, in.texCoord) * in.color;
+    float grey = dot(texColor.rgb, float3(0.299, 0.587, 0.114));
+    float3 tone = grey * u.uColorTone.rgb;
+    float4 c = float4(mix(texColor.rgb, tone, u.uColorTone.a), texColor.a);
+    return SolveBrightnessContrast(c, u);
 }
 
 // 1. fpTone.glsl - Grayscale/Monochrome on Pause / Time Stop
