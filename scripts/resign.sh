@@ -28,11 +28,18 @@ if [ ! -f "$ENTITLEMENTS" ]; then
     exit 1
 fi
 
-# Backup original signature (only if not already backed up)
+# Backup original signature
 mkdir -p "$BACKUP_DIR"
-if [ ! -d "$BACKUP_DIR/_CodeSignature" ] && [ -d "$GAME_APP/Contents/_CodeSignature" ]; then
-    echo "[InfinityMetal] 💾 Backing up original code signature for $GAME_NAME..."
-    cp -R "$GAME_APP/Contents/_CodeSignature" "$BACKUP_DIR/_CodeSignature"
+if [ -d "$GAME_APP/Contents/_CodeSignature" ]; then
+    # Check if current signature is official developer/store signature (not ad-hoc)
+    if codesign -dvv "$GAME_APP" 2>&1 | grep -q "Authority="; then
+        echo "[InfinityMetal] 💾 Backing up official code signature for $GAME_NAME..."
+        rm -rf "$BACKUP_DIR/_CodeSignature"
+        cp -R "$GAME_APP/Contents/_CodeSignature" "$BACKUP_DIR/_CodeSignature"
+    elif [ ! -d "$BACKUP_DIR/_CodeSignature" ]; then
+        echo "[InfinityMetal] 💾 Backing up existing code signature for $GAME_NAME..."
+        cp -R "$GAME_APP/Contents/_CodeSignature" "$BACKUP_DIR/_CodeSignature"
+    fi
 fi
 
 echo "[InfinityMetal] 🔐 Re-signing $GAME_NAME with ad-hoc entitlements..."
