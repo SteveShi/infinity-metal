@@ -19,7 +19,7 @@ A single universal binary (`libInfinityMetal.dylib`) automatically detects, patc
 | **Baldur's Gate: Enhanced Edition** (BG1:EE / SoD) | v2.6.6 / v2.7.3 | `/Applications/Baldur's Gate Enhanced Edition/` |
 | **Baldur's Gate II: Enhanced Edition** (BG2:EE) | v2.6.6 / v2.7.3 | `/Applications/Baldur's Gate II Enhanced Edition/` |
 | **Icewind Dale: Enhanced Edition** (IWD:EE) | v2.6.6 | `/Applications/Icewind Dale Enhanced Edition/` |
-| **Planescape Torment: Enhanced Edition** (PST:EE) | v3.1.3 / v3.2.0 | `/Applications/Planescape Torment - Enhanced Edition/` |
+| **Planescape Torment: Enhanced Edition** (PST:EE) | v3.1.3 / v3.2.1 | `/Applications/Planescape Torment - Enhanced Edition/` |
 
 ---
 

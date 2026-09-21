@@ -19,7 +19,7 @@
 | **《博德之门：增强版》**（BG1:EE / 龙矛围城） | v2.6.6 / v2.7.3 | `/Applications/Baldur's Gate Enhanced Edition/` |
 | **《博德之门 II：增强版》**（BG2:EE） | v2.6.6 / v2.7.3 | `/Applications/Baldur's Gate II Enhanced Edition/` |
 | **《冰风谷：增强版》**（IWD:EE） | v2.6.6 | `/Applications/Icewind Dale Enhanced Edition/` |
-| **《异域镇魂曲：增强版》**（PST:EE） | v3.1.3 / v3.2.0 | `/Applications/Planescape Torment - Enhanced Edition/` |
+| **《异域镇魂曲：增强版》**（PST:EE） | v3.1.3 / v3.2.1 | `/Applications/Planescape Torment - Enhanced Edition/` |
 
 ---
 
