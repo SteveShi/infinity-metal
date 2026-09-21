@@ -683,7 +683,7 @@ static void* my_dlsym(void *handle, const char *symbol) {
 __attribute__((constructor))
 static void infinitymetal_init(void) {
     NSLog(@"[InfinityMetal] ========================================");
-    NSLog(@"[InfinityMetal] Metal Rendering Backend v1.1.0 (Native Metal)");
+    NSLog(@"[InfinityMetal] Metal Rendering Backend v1.1.2 (Native Metal)");
     NSLog(@"[InfinityMetal] Infinity Engine: Enhanced Edition");
     NSLog(@"[InfinityMetal] ========================================");
 
